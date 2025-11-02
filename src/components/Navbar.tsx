@@ -115,18 +115,68 @@ export const Navbar = () => {
           {user ? (
             <>
               {claimStreak < 7 && (
-                <Button
-                  onClick={handleDailyClaim}
-                  disabled={!canClaim}
-                  size="sm"
-                  className="gap-2"
-                  variant={canClaim ? "default" : "outline"}
-                >
-                  <Gift className="w-4 h-4" />
-                  <span className="hidden md:inline">
-                    {canClaim ? `Claim Day ${claimStreak + 1}/7` : `Day ${claimStreak}/7`}
-                  </span>
-                </Button>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      size="sm"
+                      className="gap-2"
+                      variant={canClaim ? "default" : "outline"}
+                    >
+                      <Gift className="w-4 h-4" />
+                      <span className="hidden md:inline">
+                        {canClaim ? `Claim Day ${claimStreak + 1}/7` : `Day ${claimStreak}/7`}
+                      </span>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 bg-background/95 backdrop-blur-sm border-primary/20 z-50">
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <h4 className="font-bold text-lg">Daily Rewards</h4>
+                        <p className="text-sm text-muted-foreground">
+                          Claim your daily credits and build your streak!
+                        </p>
+                      </div>
+                      
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-primary/5 border border-primary/10">
+                          <div className="space-y-1">
+                            <p className="font-semibold">Day {claimStreak + 1} Reward</p>
+                            <p className="text-sm text-muted-foreground">10,000 credits</p>
+                          </div>
+                          <div className="text-2xl font-bold text-primary">+10K</div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <div className="flex justify-between text-sm">
+                            <span className="text-muted-foreground">Streak Progress</span>
+                            <span className="font-semibold">{claimStreak}/7 days</span>
+                          </div>
+                          <div className="w-full bg-secondary/20 rounded-full h-2">
+                            <div 
+                              className="bg-gradient-to-r from-primary to-secondary h-2 rounded-full transition-all"
+                              style={{ width: `${(claimStreak / 7) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                        
+                        <Button
+                          onClick={handleDailyClaim}
+                          disabled={!canClaim}
+                          className="w-full"
+                          size="lg"
+                        >
+                          {canClaim ? `Claim Day ${claimStreak + 1}` : 'Already Claimed Today'}
+                        </Button>
+                        
+                        {!canClaim && (
+                          <p className="text-xs text-center text-muted-foreground">
+                            Come back tomorrow for your next reward
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </PopoverContent>
+                </Popover>
               )}
               <Popover>
                 <PopoverTrigger asChild>
