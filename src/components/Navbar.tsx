@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Code2, LogOut, Coins, User, Settings, History, Gift } from "lucide-react";
+import { Code2, LogOut, Coins, User, Settings, History, Gift, Shield } from "lucide-react";
 import { useState, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -16,6 +16,7 @@ export const Navbar = () => {
   const [credits, setCredits] = useState<number>(0);
   const [claimStreak, setClaimStreak] = useState<number>(0);
   const [canClaim, setCanClaim] = useState<boolean>(false);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => setUser(data.user));
@@ -28,8 +29,20 @@ export const Navbar = () => {
   useEffect(() => {
     if (user) {
       fetchCredits();
+      checkAdminRole();
     }
   }, [user]);
+
+  const checkAdminRole = async () => {
+    const { data } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', user?.id)
+      .eq('role', 'admin')
+      .maybeSingle();
+    
+    setIsAdmin(!!data);
+  };
 
   const fetchCredits = async () => {
     const { data, error } = await supabase
@@ -220,6 +233,15 @@ export const Navbar = () => {
 
                     {/* Menu Items */}
                     <div className="py-2">
+                      {isAdmin && (
+                        <button 
+                          onClick={() => navigate('/admin')}
+                          className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors text-left bg-primary/5 border-l-2 border-primary"
+                        >
+                          <Shield className="w-5 h-5 text-primary" />
+                          <span className="text-foreground font-bold">Admin Dashboard</span>
+                        </button>
+                      )}
                       <button 
                         onClick={() => navigate('/profile')}
                         className="w-full flex items-center gap-3 px-4 py-3 hover:bg-accent/50 transition-colors text-left"
