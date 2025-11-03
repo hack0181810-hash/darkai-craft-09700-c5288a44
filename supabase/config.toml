@@ -1,1 +1,7 @@
 project_id = "rfgyjqywoooqdfcjmwqr"
+
+[functions.generate-plugin-background]
+verify_jwt = true
+
+[functions.check-generation-status]
+verify_jwt = true

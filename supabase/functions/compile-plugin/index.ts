@@ -22,12 +22,20 @@ serve(async (req) => {
     
     console.log('Compiling project:', project_name);
 
-    // Create a simple JAR structure
-    // In a production environment, this would:
-    // 1. Create temp directory with project structure
-    // 2. Run gradle/maven build in Docker container
-    // 3. Extract the built JAR file
-    // For now, we'll create a basic JAR with the compiled structure
+    // NOTE: This creates a SIMULATED JAR for demonstration purposes only
+    // Real Minecraft plugins require actual Java compilation with:
+    // 1. Java SDK (JDK 17+ for modern MC versions)
+    // 2. Gradle or Maven build system
+    // 3. Proper dependency resolution
+    // 
+    // To create a REAL working plugin JAR:
+    // 1. Download the source files
+    // 2. Install Java JDK and Gradle on your computer
+    // 3. Run: ./gradlew build
+    // 4. Find the compiled JAR in build/libs/
+    //
+    // The JAR created here contains source files and placeholders,
+    // NOT compiled bytecode, so it WON'T work on a Minecraft server
     
     const jarFiles: Array<{ path: string; content: string }> = [];
     
@@ -95,9 +103,10 @@ Main-Class: ${findMainClass(files)}
       JSON.stringify({ 
         success: true, 
         jar_data: base64,
-        jar_name: `${project_name}-1.0.jar`,
+        jar_name: `${project_name}-DEMO-1.0.jar`,
         size: data.length,
-        message: 'Plugin compiled successfully'
+        message: 'Demo JAR created (NOT a real compiled plugin)',
+        note: 'This is a simulated JAR. To create a real working plugin, download the source files and compile them locally using Gradle or Maven with Java JDK installed.'
       }),
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

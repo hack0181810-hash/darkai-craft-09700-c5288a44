@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { GenerationForm } from "@/components/GenerationForm";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GenerationStatus } from "@/components/GenerationStatus";
 
 import {
   Play,
@@ -61,6 +62,8 @@ export default function Sandbox() {
   const [isProcessingPrompt, setIsProcessingPrompt] = useState(false);
   const [hasGenerationError, setHasGenerationError] = useState(false);
   const [buildConsoleRef, setBuildConsoleRef] = useState<HTMLDivElement | null>(null);
+  const [generationJobId, setGenerationJobId] = useState<string | null>(null);
+  const [useBackgroundGeneration, setUseBackgroundGeneration] = useState(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -96,6 +99,44 @@ export default function Sandbox() {
     mcVersion: string;
     model: string;
   }) => {
+    // For long prompts (>300 chars), use background generation
+    const shouldUseBackground = data.description.length > 300;
+    
+    if (shouldUseBackground) {
+      try {
+        // Create a generation job
+        const { data: jobData, error: jobError } = await supabase
+          .from('generation_jobs')
+          .insert({
+            user_id: user.id,
+            description: data.description,
+            plugin_type: data.pluginType,
+            mc_version: data.mcVersion,
+            model: data.model,
+            status: 'pending'
+          })
+          .select()
+          .single();
+
+        if (jobError) throw jobError;
+
+        // Start background processing
+        setGenerationJobId(jobData.id);
+        setUseBackgroundGeneration(true);
+        
+        // Trigger the background function
+        supabase.functions.invoke('generate-plugin-background', {
+          body: { job_id: jobData.id }
+        });
+
+        toast.info("Large prompt detected - Using background generation");
+      } catch (error: any) {
+        console.error('Failed to start background generation:', error);
+        toast.error('Failed to start generation');
+      }
+      return;
+    }
+    
     setIsGenerating(true);
     setGenerationModel(data.model);
     setHasGenerationError(false);
@@ -358,16 +399,26 @@ export default function Sandbox() {
           ...prev,
           {
             time: new Date().toLocaleTimeString(),
-            message: "Compiling source files...",
+            message: "Creating demo JAR structure...",
             type: "info",
           },
           {
             time: new Date().toLocaleTimeString(),
-            message: `Build successful! Generated ${result.jar_name} (${Math.round(result.size / 1024)}KB)`,
+            message: `✅ Demo JAR created: ${result.jar_name} (${Math.round(result.size / 1024)}KB)`,
             type: "success",
           },
+          {
+            time: new Date().toLocaleTimeString(),
+            message: "⚠️ NOTE: This is a SIMULATED JAR for demonstration only",
+            type: "info",
+          },
+          {
+            time: new Date().toLocaleTimeString(),
+            message: "📥 To create a REAL working plugin: Download source files and compile locally with Gradle/Maven",
+            type: "info",
+          },
         ]);
-        toast.success("Plugin compiled successfully!");
+        toast.success("Demo JAR created! See console for important notes.");
       } else {
         throw new Error(result.error || "Compilation failed");
       }
@@ -618,6 +669,26 @@ export default function Sandbox() {
     }
   };
 
+  if (useBackgroundGeneration && generationJobId) {
+    return (
+      <div className="min-h-screen bg-background">
+        <GenerationStatus
+          jobId={generationJobId}
+          onComplete={(projectData) => {
+            setProject(projectData);
+            setSelectedFile(projectData.files[0] || null);
+            setUseBackgroundGeneration(false);
+            setGenerationJobId(null);
+          }}
+          onCancel={() => {
+            setUseBackgroundGeneration(false);
+            setGenerationJobId(null);
+          }}
+        />
+      </div>
+    );
+  }
+
   if (!project) {
     return (
       <div className="min-h-screen bg-background">
@@ -679,9 +750,10 @@ export default function Sandbox() {
                     size="sm" 
                     onClick={handleDownload} 
                     className="rounded-xl bg-green-600 hover:bg-green-700 text-xs md:text-sm"
+                    title="Note: This is a simulated JAR. For real Minecraft plugins, compile the source code using Gradle/Maven on your local machine."
                   >
                     <Download className="w-3 h-3 md:w-4 md:h-4 md:mr-2" />
-                    <span className="hidden sm:inline">JAR</span>
+                    <span className="hidden sm:inline">JAR (Demo)</span>
                   </Button>
                 )}
 

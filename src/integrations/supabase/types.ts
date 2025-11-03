@@ -38,6 +38,54 @@ export type Database = {
         }
         Relationships: []
       }
+      generation_jobs: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          description: string
+          error_message: string | null
+          id: string
+          mc_version: string
+          model: string
+          plugin_type: string
+          progress: number | null
+          project_data: Json | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          description: string
+          error_message?: string | null
+          id?: string
+          mc_version: string
+          model: string
+          plugin_type: string
+          progress?: number | null
+          project_data?: Json | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          description?: string
+          error_message?: string | null
+          id?: string
+          mc_version?: string
+          model?: string
+          plugin_type?: string
+          progress?: number | null
+          project_data?: Json | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       projects: {
         Row: {
           created_at: string
