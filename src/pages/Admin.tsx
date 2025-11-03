@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, memo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -121,7 +121,16 @@ const Admin = () => {
     });
   };
 
-  const handleGiveCredits = async () => {
+  // Optimized input handlers with useCallback
+  const handleSelectedUserChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSelectedUser(e.target.value);
+  }, []);
+
+  const handleCreditAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setCreditAmount(e.target.value);
+  }, []);
+
+  const handleGiveCredits = useCallback(async () => {
     if (!selectedUser || !creditAmount) {
       toast.error('Please select a user and enter credit amount');
       return;
@@ -155,7 +164,7 @@ const Admin = () => {
       console.error('Error giving credits:', error);
       toast.error('Failed to add credits');
     }
-  };
+  }, [selectedUser, creditAmount]);
 
   if (loading) {
     return (
@@ -174,20 +183,20 @@ const Admin = () => {
     <div className="min-h-screen bg-background">
       <Navbar />
       
-      <div className="pt-24 px-6 pb-16">
+      <div className="pt-20 md:pt-24 px-4 md:px-6 pb-12 md:pb-16">
         <div className="max-w-7xl mx-auto">
-          <div className="mb-8">
-            <div className="flex items-center gap-3 mb-2">
-              <Shield className="w-8 h-8 text-primary" />
-              <h1 className="text-4xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
+          <div className="mb-6 md:mb-8">
+            <div className="flex items-center gap-2 md:gap-3 mb-2">
+              <Shield className="w-6 h-6 md:w-8 md:h-8 text-primary" />
+              <h1 className="text-3xl md:text-4xl font-black bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
                 Admin Dashboard
               </h1>
             </div>
-            <p className="text-muted-foreground">Manage users, credits, and view analytics</p>
+            <p className="text-sm md:text-base text-muted-foreground">Manage users, credits, and view analytics</p>
           </div>
 
-          {/* Analytics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {/* Analytics Cards - Optimized grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-6 md:mb-8">
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">Total Users</CardTitle>
@@ -280,8 +289,8 @@ const Admin = () => {
                     <select
                       id="user"
                       value={selectedUser}
-                      onChange={(e) => setSelectedUser(e.target.value)}
-                      className="w-full p-2 rounded-md border bg-background"
+                      onChange={handleSelectedUserChange}
+                      className="w-full p-2 rounded-md border bg-background text-sm md:text-base"
                     >
                       <option value="">Choose a user...</option>
                       {users.map((user) => (
@@ -299,7 +308,8 @@ const Admin = () => {
                       type="number"
                       placeholder="Enter amount"
                       value={creditAmount}
-                      onChange={(e) => setCreditAmount(e.target.value)}
+                      onChange={handleCreditAmountChange}
+                      className="text-sm md:text-base"
                     />
                   </div>
 
@@ -317,4 +327,4 @@ const Admin = () => {
   );
 };
 
-export default Admin;
+export default memo(Admin);

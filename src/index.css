@@ -75,28 +75,79 @@ All colors MUST be HSL.
     font-weight: 700;
   }
 
-  /* Performance optimizations */
+  /* Performance optimizations for smooth typing and interactions */
   * {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   
-  button, a {
+  /* Disable tap highlight on mobile */
+  button, a, input, textarea, select {
     -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
   }
 
-  /* Optimize animations */
+  /* Optimize animations - reduce motion complexity */
   [class*="animate-"] {
-    will-change: transform, opacity;
+    will-change: auto;
   }
 
-  /* Input optimization */
-  input, textarea {
-    will-change: contents;
+  /* Input optimization - instant response */
+  input, textarea, select {
+    will-change: auto;
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
   }
 
-  /* Smooth scrolling */
-  * {
+  /* Force GPU acceleration for transforms only */
+  .transform {
+    transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+  }
+
+  /* Reduce motion for users who prefer it */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+
+  /* Smooth scrolling only when not typing */
+  html {
     scroll-behavior: smooth;
+  }
+
+  /* Optimize text rendering */
+  body {
+    text-rendering: optimizeSpeed;
+  }
+
+  /* Remove unnecessary backdrop filters on low-end devices */
+  @media (max-width: 768px) {
+    .backdrop-blur-xl,
+    .backdrop-blur-lg,
+    .backdrop-blur-md {
+      backdrop-filter: none;
+      background-color: hsl(var(--background));
+    }
+  }
+
+  /* Optimize card hovers */
+  .card-hover {
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  /* Remove heavy shadows on mobile */
+  @media (max-width: 640px) {
+    [class*="shadow-"] {
+      box-shadow: none !important;
+    }
   }
 }
