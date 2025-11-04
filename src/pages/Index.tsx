@@ -1,6 +1,7 @@
 import { Hero } from "@/components/Hero";
 import { FeatureGrid } from "@/components/FeatureGrid";
 import { Navbar } from "@/components/Navbar";
+import { WhitelistButton } from "@/components/WhitelistButton";
 import { ProjectsList } from "@/components/ProjectsList";
 import { Stats } from "@/components/Stats";
 import { HowItWorks } from "@/components/HowItWorks";
@@ -42,6 +43,7 @@ const Index = () => {
           <ProjectsList />
         </section>
       )}
+      <WhitelistButton />
     </div>
   );
 };

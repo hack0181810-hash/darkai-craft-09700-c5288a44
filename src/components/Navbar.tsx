@@ -294,7 +294,7 @@ export const Navbar = () => {
                     <div className="flex flex-col gap-1.5 w-5 h-5 items-end justify-center">
                       <div className="w-5 h-0.5 bg-foreground rounded-full" />
                       <div className="w-4 h-0.5 bg-foreground rounded-full" />
-                      <div className="w-5 h-0.5 bg-foreground rounded-full" />
+                      <div className="w-3 h-0.5 bg-foreground rounded-full" />
                     </div>
                   </Button>
                 </SheetTrigger>
@@ -333,7 +333,7 @@ export const Navbar = () => {
                     <div className="flex flex-col gap-1.5 w-5 h-5 items-end justify-center">
                       <div className="w-5 h-0.5 bg-foreground rounded-full" />
                       <div className="w-4 h-0.5 bg-foreground rounded-full" />
-                      <div className="w-5 h-0.5 bg-foreground rounded-full" />
+                      <div className="w-3 h-0.5 bg-foreground rounded-full" />
                     </div>
                   </Button>
                 </SheetTrigger>
