@@ -11,10 +11,17 @@ export const WhitelistButton = () => {
   const [user, setUser] = useState<any>(null);
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    const checkAuth = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    
+    checkAuth();
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
     });
+    
     return () => subscription.unsubscribe();
   }, []);
 
@@ -25,14 +32,19 @@ export const WhitelistButton = () => {
         return;
       }
 
-      const { data } = await supabase
+      const { data, error } = await supabase
         .from('user_roles')
         .select('role')
         .eq('user_id', user.id)
         .eq('role', 'admin')
         .maybeSingle();
       
-      setIsWhitelisted(!!data);
+      if (error) {
+        console.error('Error checking whitelist:', error);
+        setIsWhitelisted(false);
+      } else {
+        setIsWhitelisted(!!data);
+      }
     };
 
     checkWhitelist();

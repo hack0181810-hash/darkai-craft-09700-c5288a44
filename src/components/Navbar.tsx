@@ -34,14 +34,24 @@ export const Navbar = () => {
   }, [user]);
 
   const checkAdminRole = async () => {
-    const { data } = await supabase
+    if (!user) {
+      setIsAdmin(false);
+      return;
+    }
+
+    const { data, error } = await supabase
       .from('user_roles')
       .select('role')
-      .eq('user_id', user?.id)
+      .eq('user_id', user.id)
       .eq('role', 'admin')
       .maybeSingle();
     
-    setIsAdmin(!!data);
+    if (error) {
+      console.error('Error checking admin role:', error);
+      setIsAdmin(false);
+    } else {
+      setIsAdmin(!!data);
+    }
   };
 
   const fetchCredits = async () => {

@@ -86,7 +86,7 @@ export const Hero = () => {
           transition={{ duration: 0.8, delay: 0.6 }}
           className="flex flex-col sm:flex-row gap-4 justify-center items-center"
         >
-          <Link to="/sandbox">
+          <Link to="/generate">
             <Button variant="hero" size="lg" className="text-lg px-8 py-6 rounded-2xl">
               Get Started
               <ArrowRight className="ml-2 w-5 h-5" />
