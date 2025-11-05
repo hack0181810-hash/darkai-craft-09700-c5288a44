@@ -91,6 +91,14 @@ export default function Sandbox() {
       });
       setSelectedFile(proj.files[0] || null);
     }
+    
+    // Handle generation triggered from Generate page
+    if (location.state?.startGeneration && location.state?.generateData) {
+      const data = location.state.generateData;
+      handleGenerate(data);
+      // Clear the state to prevent re-triggering
+      navigate(location.pathname, { replace: true });
+    }
   }, [location]);
 
   const handleGenerate = async (data: {

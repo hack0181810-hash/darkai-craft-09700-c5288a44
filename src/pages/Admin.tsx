@@ -78,27 +78,34 @@ const Admin = () => {
   };
 
   const fetchUsers = async () => {
-    const { data: authUsers } = await supabase.auth.admin.listUsers();
-    
-    const usersWithCredits = await Promise.all(
-      (authUsers?.users || []).map(async (user) => {
-        const { data: credits } = await supabase
-          .from('user_credits')
-          .select('credits, claim_streak')
-          .eq('user_id', user.id)
-          .maybeSingle();
+    try {
+      // Get all users from user_credits table (which should have all users)
+      const { data: creditsData, error: creditsError } = await supabase
+        .from('user_credits')
+        .select('user_id, credits, claim_streak');
 
-        return {
-          id: user.id,
-          email: user.email || 'N/A',
-          credits: credits?.credits || 0,
-          claim_streak: credits?.claim_streak || 0,
-          created_at: user.created_at
-        };
-      })
-    );
+      if (creditsError) throw creditsError;
 
-    setUsers(usersWithCredits);
+      // Get email for each user from auth
+      const usersWithCredits = await Promise.all(
+        (creditsData || []).map(async (creditRecord) => {
+          const { data: { user } } = await supabase.auth.admin.getUserById(creditRecord.user_id);
+          
+          return {
+            id: creditRecord.user_id,
+            email: user?.email || 'N/A',
+            credits: creditRecord.credits || 0,
+            claim_streak: creditRecord.claim_streak || 0,
+            created_at: user?.created_at || new Date().toISOString()
+          };
+        })
+      );
+
+      setUsers(usersWithCredits);
+    } catch (error) {
+      console.error('Error fetching users:', error);
+      toast.error('Failed to fetch users');
+    }
   };
 
   const fetchAnalytics = async () => {
@@ -239,10 +246,11 @@ const Admin = () => {
           </div>
 
           <Tabs defaultValue="users" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-3">
-              <TabsTrigger value="users">User Management</TabsTrigger>
-              <TabsTrigger value="credits">Give Credits</TabsTrigger>
-              <TabsTrigger value="whitelist">Whitelist Management</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="users">Users</TabsTrigger>
+              <TabsTrigger value="credits">Credits</TabsTrigger>
+              <TabsTrigger value="whitelist">Whitelist</TabsTrigger>
+              <TabsTrigger value="projects">Projects</TabsTrigger>
             </TabsList>
 
             <TabsContent value="users" className="space-y-4">
@@ -375,6 +383,20 @@ const Admin = () => {
                     <p className="text-sm text-muted-foreground">
                       Whitelisted users will gain admin access and can see the admin dashboard.
                     </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="projects" className="space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Recent Projects</CardTitle>
+                  <CardDescription>View all generated projects</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    <p className="text-sm text-muted-foreground">Project management coming soon...</p>
                   </div>
                 </CardContent>
               </Card>
